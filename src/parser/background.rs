@@ -1,8 +1,15 @@
-use bevy::prelude::Color;
+use bevy::prelude::*;
+use bevy_prototype_lyon::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::utils::parse_color;
+
+const GRASS_BORDER_COLOR: Color = Color::rgb(0.78, 0.9, 0.74);
+const GRASS_FILL_COLOR: Color = Color::rgb(0.44, 0.55, 0.35);
+
+const HOCKEY_BORDER_COLOR: Color = Color::rgb(0.91, 0.8, 0.43);
+const HOCKEY_FILL_COLOR: Color = Color::rgb(0.33, 0.33, 0.33);
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum BackgroundType {
@@ -99,4 +106,121 @@ pub struct Background {
     pub corner_radius: f64,
     pub goal_line: f64,
     pub color: Color,
+}
+
+impl Background {
+    fn draw_limit(&self, commands: &mut Commands) {
+        match self.bg_type {
+            BackgroundType::Grass => {
+                commands.spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&shapes::Rectangle {
+                            extents: Vec2::new(2.0 * self.width as f32, 2.0 * self.height as f32),
+                            ..Default::default()
+                        }),
+                        ..default()
+                    },
+                    Stroke::new(GRASS_BORDER_COLOR, 3.0),
+                ));
+            }
+            BackgroundType::Hockey => {
+                commands.spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&shapes::Rectangle {
+                            extents: Vec2::new(2.0 * self.width as f32, 2.0 * self.height as f32),
+                            ..Default::default()
+                        }),
+                        ..default()
+                    },
+                    Stroke::new(HOCKEY_BORDER_COLOR, 3.0),
+                ));
+            }
+            _ => {}
+        }
+    }
+
+    fn draw_kickoff_circle(&self, commands: &mut Commands) {
+        match self.bg_type {
+            BackgroundType::Grass => {
+                commands.spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&shapes::Circle {
+                            radius: self.kick_off_radius as f32,
+                            ..Default::default()
+                        }),
+                        ..default()
+                    },
+                    Stroke::new(GRASS_BORDER_COLOR, 3.0),
+                ));
+            }
+            BackgroundType::Hockey => {
+                commands.spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&shapes::Circle {
+                            radius: self.kick_off_radius as f32,
+                            ..Default::default()
+                        }),
+                        ..default()
+                    },
+                    Stroke::new(HOCKEY_BORDER_COLOR, 3.0),
+                ));
+            }
+            _ => {}
+        }
+    }
+
+    fn draw_kickoff_line(&self, commands: &mut Commands) {
+        if self.height == 0.0 {
+            return;
+        }
+
+        match self.bg_type {
+            BackgroundType::Grass => {
+                commands.spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&shapes::Line(
+                            Vec2::new(0.0, -self.height as f32),
+                            Vec2::new(0.0, self.height as f32),
+                        )),
+                        ..default()
+                    },
+                    Stroke::new(GRASS_BORDER_COLOR, 3.0),
+                ));
+            }
+            BackgroundType::Hockey => {
+                commands.spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&shapes::Line(
+                            Vec2::new(0.0, -self.height as f32),
+                            Vec2::new(0.0, self.height as f32),
+                        )),
+                        ..default()
+                    },
+                    Stroke::new(HOCKEY_BORDER_COLOR, 3.0),
+                ));
+            }
+            _ => {}
+        }
+    }
+
+    fn fill_canvas(&self, commands: &mut Commands) {
+        match self.bg_type {
+            BackgroundType::Grass => {
+                commands.insert_resource(ClearColor(GRASS_FILL_COLOR));
+            }
+            BackgroundType::Hockey => {
+                commands.insert_resource(ClearColor(HOCKEY_FILL_COLOR));
+            }
+            _ => {
+                commands.insert_resource(ClearColor(self.color));
+            }
+        }
+    }
+
+    pub fn draw(&self, commands: &mut Commands) {
+        self.fill_canvas(commands);
+        self.draw_limit(commands);
+        self.draw_kickoff_circle(commands);
+        self.draw_kickoff_line(commands);
+    }
 }

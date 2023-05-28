@@ -1,4 +1,4 @@
-use bevy::{math::DVec2, prelude::Color};
+use bevy::{math::DVec2, prelude::*};
 use serde_json::Value;
 use std::collections::HashMap;
 
@@ -8,6 +8,7 @@ use super::{
     utils::CollisionFlag,
 };
 
+#[derive(Debug)]
 pub struct Ball(Disc);
 
 impl Default for Ball {

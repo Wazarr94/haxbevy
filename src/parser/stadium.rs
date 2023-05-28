@@ -1,4 +1,5 @@
 use bevy::math::DVec2;
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -203,6 +204,7 @@ impl StadiumRaw {
     }
 }
 
+#[derive(Resource, Debug)]
 pub struct Stadium {
     pub name: String,
     pub bg: Background,

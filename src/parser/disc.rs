@@ -1,4 +1,5 @@
-use bevy::{math::DVec2, prelude::Color};
+use bevy::{math::DVec2, prelude::*};
+use bevy_prototype_lyon::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -129,4 +130,20 @@ pub struct Disc {
     pub color: Color,
     pub c_group: CollisionFlag,
     pub c_mask: CollisionFlag,
+}
+
+impl Disc {
+    pub fn draw(&self, commands: &mut Commands) {
+        commands.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&shapes::Circle {
+                    radius: self.radius as f32,
+                    center: Vec2::new(self.position.x as f32, self.position.y as f32),
+                }),
+                ..default()
+            },
+            Fill::color(self.color),
+            Stroke::new(Color::BLACK, 1.5),
+        ));
+    }
 }

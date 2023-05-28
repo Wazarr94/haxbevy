@@ -1,4 +1,4 @@
-use bevy::prelude::Color;
+use bevy::prelude::*;
 use bitflags::bitflags;
 use serde_json::Value;
 
@@ -71,6 +71,7 @@ pub fn parse_collision(vec: &Vec<String>) -> CollisionFlag {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum Team {
     Spectator = 1,
     Red = 2,
