@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_prototype_lyon::prelude::*;
 use bitflags::bitflags;
 use serde_json::Value;
 
@@ -68,6 +69,23 @@ pub fn parse_collision(vec: &Vec<String>) -> CollisionFlag {
         flag |= s.parse().unwrap();
     }
     flag
+}
+
+pub fn arc(center: Vec2, radius: f32, start_angle: f32, end_angle: f32, tolerance: f32) -> Path {
+    let mut path_builder = PathBuilder::new();
+    let mut angle = start_angle;
+    path_builder.move_to(Vec2::new(
+        center.x + radius * start_angle.cos(),
+        center.y + radius * start_angle.sin(),
+    ));
+    while angle < end_angle {
+        angle += tolerance;
+        path_builder.line_to(Vec2::new(
+            center.x + radius * angle.cos(),
+            center.y + radius * angle.sin(),
+        ));
+    }
+    path_builder.build()
 }
 
 #[derive(Debug)]

@@ -133,13 +133,16 @@ pub struct Disc {
 }
 
 impl Disc {
-    pub fn draw(&self, commands: &mut Commands) {
+    pub fn draw(&self, commands: &mut Commands, index: usize) {
+        let z = 0.3 + index as f32 * 0.001;
+
         commands.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shapes::Circle {
                     radius: self.radius as f32,
                     center: Vec2::new(self.position.x as f32, self.position.y as f32),
                 }),
+                transform: Transform::from_xyz(0.0, 0.0, z),
                 ..default()
             },
             Fill::color(self.color),

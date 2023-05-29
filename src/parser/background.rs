@@ -118,6 +118,7 @@ impl Background {
                             extents: Vec2::new(2.0 * self.width as f32, 2.0 * self.height as f32),
                             ..Default::default()
                         }),
+                        transform: Transform::from_xyz(0.0, 0.0, 0.01),
                         ..default()
                     },
                     Stroke::new(GRASS_BORDER_COLOR, 3.0),
@@ -130,6 +131,7 @@ impl Background {
                             extents: Vec2::new(2.0 * self.width as f32, 2.0 * self.height as f32),
                             ..Default::default()
                         }),
+                        transform: Transform::from_xyz(0.0, 0.0, 0.01),
                         ..default()
                     },
                     Stroke::new(HOCKEY_BORDER_COLOR, 3.0),
@@ -148,6 +150,7 @@ impl Background {
                             radius: self.kick_off_radius as f32,
                             ..Default::default()
                         }),
+                        transform: Transform::from_xyz(0.0, 0.0, 0.11),
                         ..default()
                     },
                     Stroke::new(GRASS_BORDER_COLOR, 3.0),
@@ -160,6 +163,7 @@ impl Background {
                             radius: self.kick_off_radius as f32,
                             ..Default::default()
                         }),
+                        transform: Transform::from_xyz(0.0, 0.0, 0.11),
                         ..default()
                     },
                     Stroke::new(HOCKEY_BORDER_COLOR, 3.0),
@@ -182,6 +186,7 @@ impl Background {
                             Vec2::new(0.0, -self.height as f32),
                             Vec2::new(0.0, self.height as f32),
                         )),
+                        transform: Transform::from_xyz(0.0, 0.0, 0.12),
                         ..default()
                     },
                     Stroke::new(GRASS_BORDER_COLOR, 3.0),
@@ -194,6 +199,7 @@ impl Background {
                             Vec2::new(0.0, -self.height as f32),
                             Vec2::new(0.0, self.height as f32),
                         )),
+                        transform: Transform::from_xyz(0.0, 0.0, 0.12),
                         ..default()
                     },
                     Stroke::new(HOCKEY_BORDER_COLOR, 3.0),

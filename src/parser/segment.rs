@@ -11,7 +11,7 @@ use serde_json::Value;
 
 use super::{
     hx_trait::{Trait, Traitable},
-    utils::{parse_collision, parse_color, CollisionFlag},
+    utils::{arc, parse_collision, parse_color, CollisionFlag},
     vertex::Vertex,
 };
 
@@ -144,10 +144,33 @@ pub struct StraightSegment {
     pub color: Color,
 }
 
+impl StraightSegment {
+    fn draw(&self, commands: &mut Commands, vertexes: &[Vertex], index: usize) {
+        if !self.vis {
+            return;
+        }
+
+        let v0 = vertexes.get(self.vertex_indices.0).unwrap();
+        let v1 = vertexes.get(self.vertex_indices.1).unwrap();
+        let z = 0.2 + index as f32 * 0.0001;
+        commands.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&shapes::Line(
+                    Vec2::new(v0.position.x as f32, v0.position.y as f32),
+                    Vec2::new(v1.position.x as f32, v1.position.y as f32),
+                )),
+                transform: Transform::from_xyz(0.0, 0.0, z),
+                ..default()
+            },
+            Stroke::new(self.color, 3.0),
+        ));
+    }
+}
+
 #[derive(Debug)]
 pub struct CurvedSegment {
     pub base: StraightSegment,
-    curve: f64,
+    pub curve: f64,
 }
 
 impl Deref for CurvedSegment {
@@ -198,7 +221,6 @@ impl CurvedSegment {
         curve_value
     }
 
-    #[allow(dead_code)]
     pub fn circle_center(&self, vertexes: &[Vertex]) -> DVec2 {
         let pos_0 = vertexes[self.vertex_indices.0].position;
         let pos_1 = vertexes[self.vertex_indices.1].position;
@@ -208,7 +230,6 @@ impl CurvedSegment {
         DVec2::new(circle_center_x, circle_center_y)
     }
 
-    #[allow(dead_code)]
     pub fn circle_radius(&self, vertexes: &[Vertex]) -> f64 {
         let pos_0 = vertexes[self.vertex_indices.0].position;
         let center = self.circle_center(vertexes);
@@ -221,19 +242,53 @@ impl CurvedSegment {
         let pos_0 = vertexes[self.vertex_indices.0].position;
         let pos_1 = vertexes[self.vertex_indices.1].position;
         let center = self.circle_center(vertexes);
-        (pos_0 - center, pos_1 - center)
+        (pos_1 - center, pos_0 - center)
     }
 
-    #[allow(dead_code)]
     pub fn circle_angles(&self, vertexes: &[Vertex]) -> (f64, f64) {
-        let tangeants = self.circle_tangeants(vertexes);
-        let circle_center = self.circle_center(vertexes);
-        let angle_0 = tangeants.0.angle_between(circle_center);
-        let mut angle_1 = tangeants.1.angle_between(circle_center);
+        let pos_0 = vertexes[self.vertex_indices.0].position;
+        let pos_1 = vertexes[self.vertex_indices.1].position;
+        let center = self.circle_center(vertexes);
+        let angle_0 = (pos_0.y - center.y).atan2(pos_0.x - center.x);
+        let mut angle_1 = (pos_1.y - center.y).atan2(pos_1.x - center.x);
         while angle_1 < angle_0 {
             angle_1 += 2.0 * PI;
         }
         (angle_0, angle_1)
+    }
+
+    fn get_tolerance(&self, radius: f32) -> f32 {
+        let tolerance = PI as f32 / 16.0;
+        10.0 * tolerance / radius
+    }
+
+    fn draw(&self, commands: &mut Commands, vertexes: &[Vertex], index: usize) {
+        if !self.vis {
+            return;
+        }
+
+        let circle_angles = self.circle_angles(vertexes);
+        let circle_radius = self.circle_radius(vertexes) as f32;
+        let path = arc(
+            Vec2::new(
+                self.circle_center(vertexes).x as f32,
+                self.circle_center(vertexes).y as f32,
+            ),
+            circle_radius,
+            circle_angles.0 as f32,
+            circle_angles.1 as f32,
+            self.get_tolerance(circle_radius),
+        );
+        let z = 0.2 + index as f32 * 0.0001;
+
+        commands.spawn((
+            ShapeBundle {
+                path,
+                transform: Transform::from_xyz(0.0, 0.0, z),
+                ..default()
+            },
+            Stroke::new(self.color, 3.0),
+        ));
     }
 }
 
@@ -243,45 +298,11 @@ pub enum Segment {
     Curved(CurvedSegment),
 }
 
-impl StraightSegment {
-    fn draw(&self, commands: &mut Commands, vertexes: &[Vertex]) {
-        let v0 = vertexes.get(self.vertex_indices.0).unwrap();
-        let v1 = vertexes.get(self.vertex_indices.1).unwrap();
-        commands.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shapes::Line(
-                    Vec2::new(v0.position.x as f32, v0.position.y as f32),
-                    Vec2::new(v1.position.x as f32, v1.position.y as f32),
-                )),
-                ..default()
-            },
-            Stroke::new(self.color, 3.0),
-        ));
-    }
-}
-
-impl CurvedSegment {
-    fn draw(&self, commands: &mut Commands, vertexes: &[Vertex]) {
-        let v0 = vertexes.get(self.vertex_indices.0).unwrap();
-        let v1 = vertexes.get(self.vertex_indices.1).unwrap();
-        commands.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shapes::Line(
-                    Vec2::new(v0.position.x as f32, v0.position.y as f32),
-                    Vec2::new(v1.position.x as f32, v1.position.y as f32),
-                )),
-                ..default()
-            },
-            Stroke::new(self.color, 3.0),
-        ));
-    }
-}
-
 impl Segment {
-    pub fn draw(&self, commands: &mut Commands, vertexes: &[Vertex]) {
+    pub fn draw(&self, commands: &mut Commands, vertexes: &[Vertex], index: usize) {
         match self {
-            Segment::Straight(segment) => segment.draw(commands, vertexes),
-            Segment::Curved(segment) => segment.draw(commands, vertexes),
+            Segment::Straight(segment) => segment.draw(commands, vertexes, index),
+            Segment::Curved(segment) => segment.draw(commands, vertexes, index),
         }
     }
 }
