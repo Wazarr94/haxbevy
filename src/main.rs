@@ -2,19 +2,21 @@ use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_prototype_lyon::prelude::*;
 use parser::stadium::{Stadium, StadiumRaw};
+use renderer::RendererPlugin;
 use std::{error::Error, fs};
 
 use jsonc_parser::{parse_to_serde_value, ParseOptions};
 
 mod parser;
+mod renderer;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(ShapePlugin)
         .add_plugin(WorldInspectorPlugin::new())
-        .add_startup_system(setup)
-        .add_startup_system(draw_stadium.in_base_set(StartupSet::PostStartup))
+        .add_plugin(RendererPlugin)
+        .add_startup_system(setup.in_base_set(StartupSet::PreStartup))
         .run();
 }
 
@@ -27,7 +29,7 @@ fn read_stadium(file_name: String) -> Result<Stadium, Box<dyn Error>> {
 }
 
 fn setup(mut commands: Commands) {
-    let map = read_stadium("assets/stadiums/classic.json5".to_string()).unwrap();
+    let map = read_stadium("assets/stadiums/obstacle-map-winky.json5".to_string()).unwrap();
 
     commands.spawn(Camera2dBundle {
         transform: Transform {
@@ -37,17 +39,4 @@ fn setup(mut commands: Commands) {
         ..Default::default()
     });
     commands.insert_resource(map);
-}
-
-fn draw_stadium(mut commands: Commands, stadium: Res<Stadium>) {
-    stadium.bg.draw(&mut commands);
-
-    for (index, disc) in stadium.discs.iter().enumerate() {
-        disc.draw(&mut commands, index);
-    }
-
-    // get index and the segment from &stadium.segments
-    for (index, segment) in stadium.segments.iter().enumerate() {
-        segment.draw(&mut commands, &stadium.vertexes, index);
-    }
 }
