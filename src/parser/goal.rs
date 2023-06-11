@@ -23,7 +23,7 @@ impl GoalRaw {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Goal {
     pub p0: DVec2,
     pub p1: DVec2,

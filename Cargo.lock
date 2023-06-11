@@ -1901,6 +1901,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_prototype_lyon",
  "bitflags 2.3.1",
+ "console_error_panic_hook",
  "jsonc-parser",
  "serde",
  "serde_json",

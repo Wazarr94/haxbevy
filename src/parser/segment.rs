@@ -133,7 +133,7 @@ impl SegmentRaw {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StraightSegment {
     pub vertex_indices: (usize, usize),
     pub b_coef: f64,
@@ -167,7 +167,7 @@ impl StraightSegment {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CurvedSegment {
     pub base: StraightSegment,
     pub curve: f64,
@@ -292,7 +292,7 @@ impl CurvedSegment {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Segment {
     Straight(StraightSegment),
     Curved(CurvedSegment),

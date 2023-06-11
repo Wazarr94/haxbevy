@@ -13,13 +13,13 @@ use super::player_physics::{PlayerPhysics, PlayerPhysicsRaw};
 use super::segment::{Segment, SegmentRaw};
 use super::vertex::{Vertex, VertexRaw};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum CameraFollow {
     Player,
     Ball,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum KickoffReset {
     Partial,
     Full,
@@ -204,7 +204,7 @@ impl StadiumRaw {
     }
 }
 
-#[derive(Resource, Debug)]
+#[derive(Resource, Debug, Clone)]
 pub struct Stadium {
     pub name: String,
     pub bg: Background,

@@ -80,7 +80,7 @@ impl VertexRaw {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Vertex {
     pub position: DVec2,
     pub b_coef: f64,

@@ -88,7 +88,7 @@ pub fn arc(center: Vec2, radius: f32, start_angle: f32, end_angle: f32, toleranc
     path_builder.build()
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub enum Team {
     Spectator = 1,

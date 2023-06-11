@@ -1,24 +1,40 @@
 use bevy::prelude::*;
 
-use crate::parser::stadium::Stadium;
+use crate::{DataAssets, StadiumAsset};
 
 pub struct RendererPlugin;
 
 impl Plugin for RendererPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(draw_stadium);
+        app.add_system(render_stadium);
     }
 }
 
-fn draw_stadium(mut commands: Commands, stadium: Res<Stadium>) {
-    stadium.bg.draw(&mut commands);
+// use asset event instead
+fn render_stadium(
+    mut commands: Commands,
+    mut ev_asset: EventReader<AssetEvent<StadiumAsset>>,
+    stadium_assets: Res<Assets<StadiumAsset>>,
+    data_assets: Res<DataAssets>,
+) {
+    for ev in ev_asset.iter() {
+        if let AssetEvent::Created { handle } = ev {
+            if *handle != data_assets.stadium {
+                continue;
+            }
 
-    for (index, disc) in stadium.discs.iter().enumerate() {
-        disc.draw(&mut commands, index);
-    }
+            let stadium = stadium_assets.get(handle).unwrap();
+            let st = &stadium.0;
+            st.bg.draw(&mut commands);
 
-    // get index and the segment from &stadium.segments
-    for (index, segment) in stadium.segments.iter().enumerate() {
-        segment.draw(&mut commands, &stadium.vertexes, index);
+            for (index, disc) in st.discs.iter().enumerate() {
+                disc.draw(&mut commands, index);
+            }
+
+            // get index and the segment from &stadium.segments
+            for (index, segment) in st.segments.iter().enumerate() {
+                segment.draw(&mut commands, &st.vertexes, index);
+            }
+        }
     }
 }

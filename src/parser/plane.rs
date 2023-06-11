@@ -83,7 +83,7 @@ impl PlaneRaw {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Plane {
     pub normal: DVec2,
     pub dist: f64,

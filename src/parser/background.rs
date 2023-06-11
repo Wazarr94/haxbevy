@@ -11,7 +11,7 @@ const GRASS_FILL_COLOR: Color = Color::rgb(0.44, 0.55, 0.35);
 const HOCKEY_BORDER_COLOR: Color = Color::rgb(0.91, 0.8, 0.43);
 const HOCKEY_FILL_COLOR: Color = Color::rgb(0.33, 0.33, 0.33);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum BackgroundType {
     None,
     Grass,
@@ -95,7 +95,7 @@ impl BackgroundRaw {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Background {
     #[serde(rename = "type")]

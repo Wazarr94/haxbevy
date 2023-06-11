@@ -8,7 +8,7 @@ use super::{
     utils::CollisionFlag,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ball(Disc);
 
 impl Default for Ball {
