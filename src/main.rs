@@ -9,6 +9,7 @@ use renderer::RendererPlugin;
 
 use jsonc_parser::{parse_to_serde_value, ParseOptions};
 
+mod menu;
 mod parser;
 mod renderer;
 
