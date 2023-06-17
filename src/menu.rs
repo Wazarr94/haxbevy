@@ -1,5 +1,5 @@
 use bevy::{asset::*, prelude::*, reflect::TypeUuid};
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{egui, EguiContexts, EguiSettings};
 use jsonc_parser::{parse_to_serde_value, ParseOptions};
 
 use crate::{
@@ -28,14 +28,45 @@ struct MenuData {
 enum StadiumInfo {
     #[default]
     Classic,
+    Easy,
+    Small,
     Big,
+    Rounded,
+    Hockey,
+    BigHockey,
+    BigEasy,
+    BigRounded,
+    Huge,
 }
 
 impl StadiumInfo {
+    fn get_name(&self) -> &str {
+        match self {
+            StadiumInfo::Classic => "Classic",
+            StadiumInfo::Easy => "Easy",
+            StadiumInfo::Small => "Small",
+            StadiumInfo::Big => "Big",
+            StadiumInfo::Rounded => "Rounded",
+            StadiumInfo::Hockey => "Hockey",
+            StadiumInfo::BigHockey => "Big Hockey",
+            StadiumInfo::BigEasy => "Big Easy",
+            StadiumInfo::BigRounded => "Big Rounded",
+            StadiumInfo::Huge => "Huge",
+        }
+    }
+
     fn get_path(&self) -> &str {
         match self {
-            StadiumInfo::Classic => "stadiums/classic.json5",
-            StadiumInfo::Big => "stadiums/big.json5",
+            StadiumInfo::Classic => "stadiums/base/classic.json5",
+            StadiumInfo::Easy => "stadiums/base/easy.json5",
+            StadiumInfo::Small => "stadiums/base/small.json5",
+            StadiumInfo::Big => "stadiums/base/big.json5",
+            StadiumInfo::Rounded => "stadiums/base/rounded.json5",
+            StadiumInfo::Hockey => "stadiums/base/hockey.json5",
+            StadiumInfo::BigHockey => "stadiums/base/big_hockey.json5",
+            StadiumInfo::BigEasy => "stadiums/base/big_easy.json5",
+            StadiumInfo::BigRounded => "stadiums/base/big_rounded.json5",
+            StadiumInfo::Huge => "stadiums/base/huge.json5",
         }
     }
 }
@@ -77,7 +108,8 @@ impl AssetLoader for StadiumLoader {
     }
 }
 
-fn setup_menu(mut commands: Commands) {
+fn setup_menu(mut commands: Commands, mut egui_settings: ResMut<EguiSettings>) {
+    egui_settings.scale_factor = 4.0;
     commands.insert_resource(AssetsLoading::default());
     commands.insert_resource(MenuData {
         stadium_info: StadiumInfo::Classic,
@@ -97,8 +129,56 @@ fn menu(
         egui::ComboBox::from_id_source("stadium")
             .selected_text(format!("{:?}", menu_data.stadium_info))
             .show_ui(ui, |ui| {
-                ui.selectable_value(&mut menu_data.stadium_info, StadiumInfo::Classic, "Classic");
-                ui.selectable_value(&mut menu_data.stadium_info, StadiumInfo::Big, "Big");
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::Classic,
+                    StadiumInfo::Classic.get_name(),
+                );
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::Easy,
+                    StadiumInfo::Easy.get_name(),
+                );
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::Small,
+                    StadiumInfo::Small.get_name(),
+                );
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::Big,
+                    StadiumInfo::Big.get_name(),
+                );
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::Rounded,
+                    StadiumInfo::Rounded.get_name(),
+                );
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::Hockey,
+                    StadiumInfo::Hockey.get_name(),
+                );
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::BigHockey,
+                    StadiumInfo::BigHockey.get_name(),
+                );
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::BigEasy,
+                    StadiumInfo::BigEasy.get_name(),
+                );
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::BigRounded,
+                    StadiumInfo::BigRounded.get_name(),
+                );
+                ui.selectable_value(
+                    &mut menu_data.stadium_info,
+                    StadiumInfo::Huge,
+                    StadiumInfo::Huge.get_name(),
+                );
             });
 
         if ui.button("Load").clicked() {
