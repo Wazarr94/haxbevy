@@ -114,8 +114,14 @@ impl Background {
             BackgroundType::Grass => {
                 commands.spawn((
                     ShapeBundle {
-                        path: GeometryBuilder::build_as(&shapes::Rectangle {
-                            extents: Vec2::new(2.0 * self.width as f32, 2.0 * self.height as f32),
+                        path: GeometryBuilder::build_as(&shapes::RoundedPolygon {
+                            points: vec![
+                                Vec2::new(-self.width as f32, -self.height as f32),
+                                Vec2::new(self.width as f32, -self.height as f32),
+                                Vec2::new(self.width as f32, self.height as f32),
+                                Vec2::new(-self.width as f32, self.height as f32),
+                            ],
+                            radius: self.corner_radius as f32,
                             ..Default::default()
                         }),
                         transform: Transform::from_xyz(0.0, 0.0, 0.01),
@@ -127,8 +133,14 @@ impl Background {
             BackgroundType::Hockey => {
                 commands.spawn((
                     ShapeBundle {
-                        path: GeometryBuilder::build_as(&shapes::Rectangle {
-                            extents: Vec2::new(2.0 * self.width as f32, 2.0 * self.height as f32),
+                        path: GeometryBuilder::build_as(&shapes::RoundedPolygon {
+                            points: vec![
+                                Vec2::new(-self.width as f32, -self.height as f32),
+                                Vec2::new(self.width as f32, -self.height as f32),
+                                Vec2::new(self.width as f32, self.height as f32),
+                                Vec2::new(-self.width as f32, self.height as f32),
+                            ],
+                            radius: self.corner_radius as f32,
                             ..Default::default()
                         }),
                         transform: Transform::from_xyz(0.0, 0.0, 0.01),
