@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::window::PresentMode;
 use bevy_egui::EguiPlugin;
 use bevy_prototype_lyon::prelude::*;
 use debug::DebugPlugin;
@@ -17,13 +18,23 @@ fn main() {
 
     App::new()
         .add_state::<AppState>()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                resolution: (1920., 1080.).into(),
+                present_mode: PresentMode::AutoVsync,
+                // Tells wasm to resize the window according to the available canvas
+                fit_canvas_to_parent: true,
+                // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
+                prevent_default_event_handling: false,
+                ..default()
+            }),
+            ..default()
+        }))
         .add_plugin(EguiPlugin)
         .add_plugin(ShapePlugin)
         .add_plugin(DebugPlugin)
         .add_plugin(MenuPlugin)
         .add_plugin(RendererPlugin)
-        .add_startup_system(setup)
         .run();
 }
 
@@ -32,14 +43,4 @@ enum AppState {
     #[default]
     Menu,
     InGame,
-}
-
-fn setup(mut commands: Commands) {
-    commands.spawn(Camera2dBundle {
-        transform: Transform {
-            scale: Vec3::new(0.7, -0.7, -1.0),
-            ..Default::default()
-        },
-        ..Default::default()
-    });
 }

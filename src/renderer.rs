@@ -1,5 +1,5 @@
 use crate::menu::{DataAssets, StadiumAsset};
-use bevy::prelude::*;
+use bevy::{prelude::*, render::camera::ScalingMode};
 
 use crate::AppState;
 
@@ -18,6 +18,16 @@ fn render_stadium(
 ) {
     let stadium = stadium_assets.get(&data_assets.stadium).unwrap();
     let st = &stadium.0;
+
+    commands.spawn(Camera2dBundle {
+        projection: OrthographicProjection {
+            scale: st.width as f32,
+            scaling_mode: ScalingMode::FixedHorizontal(2.0),
+
+            ..Default::default()
+        },
+        ..Default::default()
+    });
 
     st.bg.draw(&mut commands);
 
