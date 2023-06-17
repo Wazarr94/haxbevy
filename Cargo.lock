@@ -1899,6 +1899,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
+ "bevy_egui",
  "bevy_prototype_lyon",
  "bitflags 2.3.1",
  "console_error_panic_hook",
