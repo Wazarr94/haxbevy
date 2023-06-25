@@ -95,3 +95,12 @@ pub enum Team {
     Red = 2,
     Blue = 3,
 }
+
+#[derive(Component, Debug, Clone)]
+pub struct BouncingCoef(pub f64);
+
+#[derive(Component, Debug, Clone)]
+pub struct Collision {
+    pub group: CollisionFlag,
+    pub mask: CollisionFlag,
+}

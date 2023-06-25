@@ -21,11 +21,12 @@ impl Plugin for MenuPlugin {
 
 #[derive(Resource, Default)]
 struct MenuData {
-    stadium_info: StadiumInfo,
+    base_stadium_info: BaseStadiumInfo,
+    custom_stadium_info: CustomStadiumInfo,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-enum StadiumInfo {
+enum BaseStadiumInfo {
     #[default]
     Classic,
     Easy,
@@ -39,34 +40,66 @@ enum StadiumInfo {
     Huge,
 }
 
-impl StadiumInfo {
+impl BaseStadiumInfo {
     fn get_name(&self) -> &str {
         match self {
-            StadiumInfo::Classic => "Classic",
-            StadiumInfo::Easy => "Easy",
-            StadiumInfo::Small => "Small",
-            StadiumInfo::Big => "Big",
-            StadiumInfo::Rounded => "Rounded",
-            StadiumInfo::Hockey => "Hockey",
-            StadiumInfo::BigHockey => "Big Hockey",
-            StadiumInfo::BigEasy => "Big Easy",
-            StadiumInfo::BigRounded => "Big Rounded",
-            StadiumInfo::Huge => "Huge",
+            BaseStadiumInfo::Classic => "Classic",
+            BaseStadiumInfo::Easy => "Easy",
+            BaseStadiumInfo::Small => "Small",
+            BaseStadiumInfo::Big => "Big",
+            BaseStadiumInfo::Rounded => "Rounded",
+            BaseStadiumInfo::Hockey => "Hockey",
+            BaseStadiumInfo::BigHockey => "Big Hockey",
+            BaseStadiumInfo::BigEasy => "Big Easy",
+            BaseStadiumInfo::BigRounded => "Big Rounded",
+            BaseStadiumInfo::Huge => "Huge",
         }
     }
 
     fn get_path(&self) -> &str {
         match self {
-            StadiumInfo::Classic => "stadiums/base/classic.json5",
-            StadiumInfo::Easy => "stadiums/base/easy.json5",
-            StadiumInfo::Small => "stadiums/base/small.json5",
-            StadiumInfo::Big => "stadiums/base/big.json5",
-            StadiumInfo::Rounded => "stadiums/base/rounded.json5",
-            StadiumInfo::Hockey => "stadiums/base/hockey.json5",
-            StadiumInfo::BigHockey => "stadiums/base/big_hockey.json5",
-            StadiumInfo::BigEasy => "stadiums/base/big_easy.json5",
-            StadiumInfo::BigRounded => "stadiums/base/big_rounded.json5",
-            StadiumInfo::Huge => "stadiums/base/huge.json5",
+            BaseStadiumInfo::Classic => "stadiums/base/classic.json5",
+            BaseStadiumInfo::Easy => "stadiums/base/easy.json5",
+            BaseStadiumInfo::Small => "stadiums/base/small.json5",
+            BaseStadiumInfo::Big => "stadiums/base/big.json5",
+            BaseStadiumInfo::Rounded => "stadiums/base/rounded.json5",
+            BaseStadiumInfo::Hockey => "stadiums/base/hockey.json5",
+            BaseStadiumInfo::BigHockey => "stadiums/base/big_hockey.json5",
+            BaseStadiumInfo::BigEasy => "stadiums/base/big_easy.json5",
+            BaseStadiumInfo::BigRounded => "stadiums/base/big_rounded.json5",
+            BaseStadiumInfo::Huge => "stadiums/base/huge.json5",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+enum CustomStadiumInfo {
+    #[default]
+    FutsalClassic,
+    FutsalBig,
+    PenaltySoccer,
+    ObstacleWinky,
+    FightingSingle,
+}
+
+impl CustomStadiumInfo {
+    fn get_name(&self) -> &str {
+        match self {
+            CustomStadiumInfo::FutsalClassic => "Futsal Classic",
+            CustomStadiumInfo::FutsalBig => "Futsal Big",
+            CustomStadiumInfo::PenaltySoccer => "Penalty Soccer",
+            CustomStadiumInfo::ObstacleWinky => "Obstacle Winky",
+            CustomStadiumInfo::FightingSingle => "Fighting Single",
+        }
+    }
+
+    fn get_path(&self) -> &str {
+        match self {
+            CustomStadiumInfo::FutsalClassic => "stadiums/custom/futsal-classic.json5",
+            CustomStadiumInfo::FutsalBig => "stadiums/custom/futsal-big.json5",
+            CustomStadiumInfo::PenaltySoccer => "stadiums/custom/penalty-soccer.json5",
+            CustomStadiumInfo::ObstacleWinky => "stadiums/custom/obstacle-map-winky.json5",
+            CustomStadiumInfo::FightingSingle => "stadiums/custom/fighting-single.json5",
         }
     }
 }
@@ -109,10 +142,11 @@ impl AssetLoader for StadiumLoader {
 }
 
 fn setup_menu(mut commands: Commands, mut egui_settings: ResMut<EguiSettings>) {
-    egui_settings.scale_factor = 4.0;
+    egui_settings.scale_factor = 2.0;
     commands.insert_resource(AssetsLoading::default());
     commands.insert_resource(MenuData {
-        stadium_info: StadiumInfo::Classic,
+        base_stadium_info: BaseStadiumInfo::default(),
+        custom_stadium_info: CustomStadiumInfo::default(),
     });
 }
 
@@ -126,66 +160,112 @@ fn menu(
     egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
         ui.heading("Stadiums");
 
-        egui::ComboBox::from_id_source("stadium")
-            .selected_text(format!("{:?}", menu_data.stadium_info))
-            .show_ui(ui, |ui| {
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::Classic,
-                    StadiumInfo::Classic.get_name(),
-                );
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::Easy,
-                    StadiumInfo::Easy.get_name(),
-                );
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::Small,
-                    StadiumInfo::Small.get_name(),
-                );
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::Big,
-                    StadiumInfo::Big.get_name(),
-                );
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::Rounded,
-                    StadiumInfo::Rounded.get_name(),
-                );
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::Hockey,
-                    StadiumInfo::Hockey.get_name(),
-                );
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::BigHockey,
-                    StadiumInfo::BigHockey.get_name(),
-                );
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::BigEasy,
-                    StadiumInfo::BigEasy.get_name(),
-                );
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::BigRounded,
-                    StadiumInfo::BigRounded.get_name(),
-                );
-                ui.selectable_value(
-                    &mut menu_data.stadium_info,
-                    StadiumInfo::Huge,
-                    StadiumInfo::Huge.get_name(),
-                );
-            });
+        // Base stadiums
+        ui.horizontal(|ui| {
+            ui.label("Base stadiums");
+            egui::ComboBox::from_id_source("base_stadium")
+                .selected_text(format!("{:?}", menu_data.base_stadium_info))
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::Classic,
+                        BaseStadiumInfo::Classic.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::Easy,
+                        BaseStadiumInfo::Easy.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::Small,
+                        BaseStadiumInfo::Small.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::Big,
+                        BaseStadiumInfo::Big.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::Rounded,
+                        BaseStadiumInfo::Rounded.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::Hockey,
+                        BaseStadiumInfo::Hockey.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::BigHockey,
+                        BaseStadiumInfo::BigHockey.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::BigEasy,
+                        BaseStadiumInfo::BigEasy.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::BigRounded,
+                        BaseStadiumInfo::BigRounded.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.base_stadium_info,
+                        BaseStadiumInfo::Huge,
+                        BaseStadiumInfo::Huge.get_name(),
+                    );
+                });
+            ui.add_space(8.0);
+            if ui.button("Load base").clicked() {
+                let stadium = asset_server.load(menu_data.base_stadium_info.get_path());
+                loading.0.push(stadium.clone_untyped());
+                commands.insert_resource(DataAssets { stadium });
+            }
+        });
 
-        if ui.button("Load").clicked() {
-            let stadium = asset_server.load(menu_data.stadium_info.get_path());
-            loading.0.push(stadium.clone_untyped());
-            commands.insert_resource(DataAssets { stadium });
-        }
+        ui.add_space(4.0);
+
+        // Custom stadiums
+        ui.horizontal(|ui| {
+            ui.label("Custom stadiums");
+            egui::ComboBox::from_id_source("custom_stadium")
+                .selected_text(format!("{:?}", menu_data.custom_stadium_info))
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(
+                        &mut menu_data.custom_stadium_info,
+                        CustomStadiumInfo::FutsalClassic,
+                        CustomStadiumInfo::FutsalClassic.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.custom_stadium_info,
+                        CustomStadiumInfo::FutsalBig,
+                        CustomStadiumInfo::FutsalBig.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.custom_stadium_info,
+                        CustomStadiumInfo::PenaltySoccer,
+                        CustomStadiumInfo::PenaltySoccer.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.custom_stadium_info,
+                        CustomStadiumInfo::ObstacleWinky,
+                        CustomStadiumInfo::ObstacleWinky.get_name(),
+                    );
+                    ui.selectable_value(
+                        &mut menu_data.custom_stadium_info,
+                        CustomStadiumInfo::FightingSingle,
+                        CustomStadiumInfo::FightingSingle.get_name(),
+                    );
+                });
+            ui.add_space(8.0);
+            if ui.button("Load custom").clicked() {
+                let stadium = asset_server.load(menu_data.custom_stadium_info.get_path());
+                loading.0.push(stadium.clone_untyped());
+                commands.insert_resource(DataAssets { stadium });
+            }
+        });
     });
 }
 

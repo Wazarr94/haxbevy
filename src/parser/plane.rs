@@ -1,10 +1,11 @@
 use bevy::math::DVec2;
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use super::{
     hx_trait::{Trait, Traitable},
-    utils::{parse_collision, CollisionFlag},
+    utils::{parse_collision, BouncingCoef, Collision, CollisionFlag},
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -90,4 +91,26 @@ pub struct Plane {
     pub b_coef: f64,
     pub c_group: CollisionFlag,
     pub c_mask: CollisionFlag,
+}
+
+#[derive(Component, Debug, Clone)]
+pub struct PlaneComponent {
+    pub normal: DVec2,
+    pub dist: f64,
+}
+
+impl Plane {
+    pub fn spawn(&self, stadium_parent: &mut ChildBuilder) {
+        stadium_parent.spawn((
+            PlaneComponent {
+                normal: self.normal,
+                dist: self.dist,
+            },
+            BouncingCoef(self.b_coef),
+            Collision {
+                group: self.c_group,
+                mask: self.c_mask,
+            },
+        ));
+    }
 }

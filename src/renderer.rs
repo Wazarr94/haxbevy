@@ -7,11 +7,11 @@ pub struct RendererPlugin;
 
 impl Plugin for RendererPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(render_stadium.in_schedule(OnEnter(AppState::InGame)));
+        app.add_systems((spawn_stadium,).in_schedule(OnEnter(AppState::InGame)));
     }
 }
 
-fn render_stadium(
+fn spawn_stadium(
     mut commands: Commands,
     stadium_assets: Res<Assets<StadiumAsset>>,
     data_assets: Res<DataAssets>,
@@ -23,20 +23,14 @@ fn render_stadium(
         projection: OrthographicProjection {
             scale: st.width as f32,
             scaling_mode: ScalingMode::FixedHorizontal(2.0),
-
+            ..Default::default()
+        },
+        transform: Transform {
+            scale: Vec3::new(1.0, -1.0, -1.0),
             ..Default::default()
         },
         ..Default::default()
     });
 
-    st.bg.draw(&mut commands);
-
-    for (index, disc) in st.discs.iter().enumerate() {
-        disc.draw(&mut commands, index);
-    }
-
-    // get index and the segment from &stadium.segments
-    for (index, segment) in st.segments.iter().enumerate() {
-        segment.draw(&mut commands, &st.vertexes, index);
-    }
+    st.spawn(&mut commands);
 }

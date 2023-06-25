@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use super::{
     hx_trait::{Trait, Traitable},
-    utils::{parse_collision, parse_color, CollisionFlag},
+    utils::{parse_collision, parse_color, BouncingCoef, Collision, CollisionFlag},
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -132,21 +132,48 @@ pub struct Disc {
     pub c_mask: CollisionFlag,
 }
 
+#[derive(Component, Debug, Clone, Copy)]
+pub struct DiscComp;
+
+#[derive(Component, Debug, Clone, Copy)]
+pub struct Velocity(pub DVec2);
+
+#[derive(Component, Debug, Clone, Copy)]
+pub struct Gravity(pub DVec2);
+
+#[derive(Component, Debug, Clone, Copy)]
+pub struct InverseMass(pub f64);
+
+#[derive(Component, Debug, Clone, Copy)]
+pub struct Damping(pub f64);
+
 impl Disc {
-    pub fn draw(&self, commands: &mut Commands, index: usize) {
+    pub fn spawn(&self, stadium_parent: &mut ChildBuilder, index: usize) {
         let z = 0.3 + index as f32 * 0.001;
 
-        commands.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shapes::Circle {
-                    radius: self.radius as f32,
-                    center: Vec2::new(self.position.x as f32, self.position.y as f32),
-                }),
-                transform: Transform::from_xyz(0.0, 0.0, z),
-                ..default()
+        stadium_parent.spawn((
+            DiscComp,
+            (
+                ShapeBundle {
+                    path: GeometryBuilder::build_as(&shapes::Circle {
+                        radius: self.radius as f32,
+                        center: Vec2::new(self.position.x as f32, self.position.y as f32),
+                    }),
+                    transform: Transform::from_xyz(0.0, 0.0, z),
+                    ..default()
+                },
+                Fill::color(self.color),
+                Stroke::new(Color::BLACK, 1.5),
+            ),
+            Velocity(self.speed),
+            Gravity(self.gravity),
+            InverseMass(self.inv_mass),
+            Damping(self.damping),
+            BouncingCoef(self.b_coef),
+            Collision {
+                group: self.c_group,
+                mask: self.c_mask,
             },
-            Fill::color(self.color),
-            Stroke::new(Color::BLACK, 1.5),
         ));
     }
 }

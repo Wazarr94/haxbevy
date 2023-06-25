@@ -1,5 +1,6 @@
 use super::utils::Team;
 use bevy::math::DVec2;
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -28,4 +29,21 @@ pub struct Goal {
     pub p0: DVec2,
     pub p1: DVec2,
     pub team: Team,
+}
+
+#[derive(Component, Debug, Clone)]
+pub struct GoalComp {
+    pub p0: DVec2,
+    pub p1: DVec2,
+    pub team: Team,
+}
+
+impl Goal {
+    pub fn spawn(&self, stadium_parent: &mut ChildBuilder) {
+        stadium_parent.spawn(GoalComp {
+            p0: self.p0,
+            p1: self.p1,
+            team: self.team.clone(),
+        });
+    }
 }

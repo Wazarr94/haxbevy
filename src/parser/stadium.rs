@@ -207,23 +207,100 @@ impl StadiumRaw {
 #[derive(Resource, Debug, Clone)]
 pub struct Stadium {
     pub name: String,
-    pub bg: Background,
     pub width: f64,
     pub height: f64,
+    pub can_be_stored: bool,
+    pub red_spawn_points: Vec<DVec2>,
+    pub blue_spawn_points: Vec<DVec2>,
+    pub player_physics: PlayerPhysics,
+    pub spawn_distance: f64,
+    pub kick_off_reset: KickoffReset,
     pub camera_width: f64,
     pub camera_height: f64,
     pub max_view_width: f64,
     pub camera_follow: CameraFollow,
-    pub spawn_distance: f64,
-    pub can_be_stored: bool,
-    pub kick_off_reset: KickoffReset,
+    pub bg: Background,
     pub vertexes: Vec<Vertex>,
     pub segments: Vec<Segment>,
     pub goals: Vec<Goal>,
     pub discs: Vec<Disc>,
     pub planes: Vec<Plane>,
+    pub ball_physics: Ball,
+}
+
+#[derive(Component, Debug, Clone)]
+pub struct StadiumComp {
+    pub name: String,
+    pub width: f64,
+    pub height: f64,
+    pub can_be_stored: bool,
     pub red_spawn_points: Vec<DVec2>,
     pub blue_spawn_points: Vec<DVec2>,
     pub player_physics: PlayerPhysics,
-    pub ball_physics: Ball,
+    pub spawn_distance: f64,
+    pub kick_off_reset: KickoffReset,
 }
+
+#[derive(Component, Debug, Clone)]
+pub struct StadiumCamera {
+    pub camera_width: f64,
+    pub camera_height: f64,
+    pub max_view_width: f64,
+    pub camera_follow: CameraFollow,
+}
+
+impl Stadium {
+    pub fn spawn(&self, commands: &mut Commands) {
+        commands
+            .spawn((
+                SpatialBundle::default(),
+                StadiumComp {
+                    name: self.name.clone(),
+                    width: self.width,
+                    height: self.height,
+                    can_be_stored: self.can_be_stored,
+                    red_spawn_points: self.red_spawn_points.clone(),
+                    blue_spawn_points: self.blue_spawn_points.clone(),
+                    player_physics: self.player_physics.clone(),
+                    spawn_distance: self.spawn_distance,
+                    kick_off_reset: self.kick_off_reset.clone(),
+                },
+                StadiumCamera {
+                    camera_width: self.camera_width,
+                    camera_height: self.camera_height,
+                    max_view_width: self.max_view_width,
+                    camera_follow: self.camera_follow.clone(),
+                },
+            ))
+            .with_children(|parent| {
+                self.bg.spawn(parent);
+
+                for vertex in &self.vertexes {
+                    vertex.spawn(parent);
+                }
+
+                for (index, segment) in self.segments.iter().enumerate() {
+                    segment.spawn(parent, &self.vertexes, index);
+                }
+
+                for goal in &self.goals {
+                    goal.spawn(parent);
+                }
+
+                for (index, disc) in self.discs.iter().enumerate() {
+                    disc.spawn(parent, index);
+                }
+
+                for plane in &self.planes {
+                    plane.spawn(parent);
+                }
+            });
+
+        self.bg.fill_canvas(commands);
+    }
+}
+
+// stadium properties component
+// stadium camera properties component
+// stadium bundle
+// the rest will be a child of the stadium bundle

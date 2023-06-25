@@ -1,10 +1,11 @@
 use bevy::math::DVec2;
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use super::{
     hx_trait::{Trait, Traitable},
-    utils::{parse_collision, CollisionFlag},
+    utils::{parse_collision, BouncingCoef, Collision, CollisionFlag},
 };
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -86,4 +87,24 @@ pub struct Vertex {
     pub b_coef: f64,
     pub c_group: CollisionFlag,
     pub c_mask: CollisionFlag,
+}
+
+#[derive(Component, Debug, Clone)]
+pub struct VertexComp {
+    pub position: DVec2,
+}
+
+impl Vertex {
+    pub fn spawn(&self, stadium_parent: &mut ChildBuilder) {
+        stadium_parent.spawn((
+            VertexComp {
+                position: self.position,
+            },
+            BouncingCoef(self.b_coef),
+            Collision {
+                group: self.c_group,
+                mask: self.c_mask,
+            },
+        ));
+    }
 }

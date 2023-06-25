@@ -109,10 +109,10 @@ pub struct Background {
 }
 
 impl Background {
-    fn draw_limit(&self, commands: &mut Commands) {
+    fn draw_limit(&self, stadium_parent: &mut ChildBuilder) {
         match self.bg_type {
             BackgroundType::Grass => {
-                commands.spawn((
+                stadium_parent.spawn((
                     ShapeBundle {
                         path: GeometryBuilder::build_as(&shapes::RoundedPolygon {
                             points: vec![
@@ -131,7 +131,7 @@ impl Background {
                 ));
             }
             BackgroundType::Hockey => {
-                commands.spawn((
+                stadium_parent.spawn((
                     ShapeBundle {
                         path: GeometryBuilder::build_as(&shapes::RoundedPolygon {
                             points: vec![
@@ -153,10 +153,10 @@ impl Background {
         }
     }
 
-    fn draw_kickoff_circle(&self, commands: &mut Commands) {
+    fn draw_kickoff_circle(&self, stadium_parent: &mut ChildBuilder) {
         match self.bg_type {
             BackgroundType::Grass => {
-                commands.spawn((
+                stadium_parent.spawn((
                     ShapeBundle {
                         path: GeometryBuilder::build_as(&shapes::Circle {
                             radius: self.kick_off_radius as f32,
@@ -169,7 +169,7 @@ impl Background {
                 ));
             }
             BackgroundType::Hockey => {
-                commands.spawn((
+                stadium_parent.spawn((
                     ShapeBundle {
                         path: GeometryBuilder::build_as(&shapes::Circle {
                             radius: self.kick_off_radius as f32,
@@ -185,14 +185,14 @@ impl Background {
         }
     }
 
-    fn draw_kickoff_line(&self, commands: &mut Commands) {
+    fn draw_kickoff_line(&self, stadium_parent: &mut ChildBuilder) {
         if self.height == 0.0 {
             return;
         }
 
         match self.bg_type {
             BackgroundType::Grass => {
-                commands.spawn((
+                stadium_parent.spawn((
                     ShapeBundle {
                         path: GeometryBuilder::build_as(&shapes::Line(
                             Vec2::new(0.0, -self.height as f32),
@@ -205,7 +205,7 @@ impl Background {
                 ));
             }
             BackgroundType::Hockey => {
-                commands.spawn((
+                stadium_parent.spawn((
                     ShapeBundle {
                         path: GeometryBuilder::build_as(&shapes::Line(
                             Vec2::new(0.0, -self.height as f32),
@@ -221,7 +221,7 @@ impl Background {
         }
     }
 
-    fn fill_canvas(&self, commands: &mut Commands) {
+    pub fn fill_canvas(&self, commands: &mut Commands) {
         match self.bg_type {
             BackgroundType::Grass => {
                 commands.insert_resource(ClearColor(GRASS_FILL_COLOR));
@@ -235,10 +235,9 @@ impl Background {
         }
     }
 
-    pub fn draw(&self, commands: &mut Commands) {
-        self.fill_canvas(commands);
-        self.draw_limit(commands);
-        self.draw_kickoff_circle(commands);
-        self.draw_kickoff_line(commands);
+    pub fn spawn(&self, stadium_parent: &mut ChildBuilder) {
+        self.draw_limit(stadium_parent);
+        self.draw_kickoff_circle(stadium_parent);
+        self.draw_kickoff_line(stadium_parent);
     }
 }

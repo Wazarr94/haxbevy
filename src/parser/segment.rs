@@ -11,7 +11,7 @@ use serde_json::Value;
 
 use super::{
     hx_trait::{Trait, Traitable},
-    utils::{arc, parse_collision, parse_color, CollisionFlag},
+    utils::{arc, parse_collision, parse_color, BouncingCoef, Collision, CollisionFlag},
     vertex::Vertex,
 };
 
@@ -136,34 +136,56 @@ impl SegmentRaw {
 #[derive(Debug, Clone)]
 pub struct StraightSegment {
     pub vertex_indices: (usize, usize),
+    pub vis: bool,
+    pub color: Color,
     pub b_coef: f64,
     pub bias: f64,
     pub c_group: CollisionFlag,
     pub c_mask: CollisionFlag,
-    pub vis: bool,
-    pub color: Color,
 }
 
-impl StraightSegment {
-    fn draw(&self, commands: &mut Commands, vertexes: &[Vertex], index: usize) {
-        if !self.vis {
-            return;
-        }
+#[derive(Component, Debug, Clone)]
+pub struct SegmentComp {
+    pub vertex_indices: (usize, usize),
+}
 
+#[derive(Component, Debug, Clone)]
+pub struct Bias(pub f64);
+
+#[derive(Component, Debug, Clone)]
+pub struct Curve(pub f64);
+
+impl StraightSegment {
+    fn spawn(&self, stadium_parent: &mut ChildBuilder, vertexes: &[Vertex], index: usize) {
         let v0 = vertexes.get(self.vertex_indices.0).unwrap();
         let v1 = vertexes.get(self.vertex_indices.1).unwrap();
         let z = 0.2 + index as f32 * 0.0001;
-        commands.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shapes::Line(
-                    Vec2::new(v0.position.x as f32, v0.position.y as f32),
-                    Vec2::new(v1.position.x as f32, v1.position.y as f32),
-                )),
-                transform: Transform::from_xyz(0.0, 0.0, z),
-                ..default()
+
+        stadium_parent.spawn((
+            SegmentComp {
+                vertex_indices: self.vertex_indices,
             },
-            Stroke::new(self.color, 3.0),
+            Bias(self.bias),
+            BouncingCoef(self.b_coef),
+            Collision {
+                group: self.c_group,
+                mask: self.c_mask,
+            },
         ));
+
+        if self.vis {
+            stadium_parent.spawn((
+                ShapeBundle {
+                    path: GeometryBuilder::build_as(&shapes::Line(
+                        Vec2::new(v0.position.x as f32, v0.position.y as f32),
+                        Vec2::new(v1.position.x as f32, v1.position.y as f32),
+                    )),
+                    transform: Transform::from_xyz(0.0, 0.0, z),
+                    ..default()
+                },
+                Stroke::new(self.color, 3.0),
+            ));
+        }
     }
 }
 
@@ -262,10 +284,8 @@ impl CurvedSegment {
         10.0 * tolerance / radius
     }
 
-    fn draw(&self, commands: &mut Commands, vertexes: &[Vertex], index: usize) {
-        if !self.vis {
-            return;
-        }
+    fn spawn(&self, stadium_parent: &mut ChildBuilder, vertexes: &[Vertex], index: usize) {
+        let z = 0.2 + index as f32 * 0.0001;
 
         let circle_angles = self.circle_angles(vertexes);
         let circle_radius = self.circle_radius(vertexes) as f32;
@@ -279,16 +299,30 @@ impl CurvedSegment {
             circle_angles.1 as f32,
             self.get_tolerance(circle_radius),
         );
-        let z = 0.2 + index as f32 * 0.0001;
 
-        commands.spawn((
-            ShapeBundle {
-                path,
-                transform: Transform::from_xyz(0.0, 0.0, z),
-                ..default()
+        stadium_parent.spawn((
+            SegmentComp {
+                vertex_indices: self.vertex_indices,
             },
-            Stroke::new(self.color, 3.0),
+            Curve(self.curve),
+            Bias(self.bias),
+            BouncingCoef(self.b_coef),
+            Collision {
+                group: self.c_group,
+                mask: self.c_mask,
+            },
         ));
+
+        if self.vis {
+            stadium_parent.spawn((
+                ShapeBundle {
+                    path,
+                    transform: Transform::from_xyz(0.0, 0.0, z),
+                    ..default()
+                },
+                Stroke::new(self.color, 3.0),
+            ));
+        }
     }
 }
 
@@ -299,10 +333,10 @@ pub enum Segment {
 }
 
 impl Segment {
-    pub fn draw(&self, commands: &mut Commands, vertexes: &[Vertex], index: usize) {
+    pub fn spawn(&self, stadium_parent: &mut ChildBuilder, vertexes: &[Vertex], index: usize) {
         match self {
-            Segment::Straight(segment) => segment.draw(commands, vertexes, index),
-            Segment::Curved(segment) => segment.draw(commands, vertexes, index),
+            Segment::Straight(segment) => segment.spawn(stadium_parent, vertexes, index),
+            Segment::Curved(segment) => segment.spawn(stadium_parent, vertexes, index),
         }
     }
 }
