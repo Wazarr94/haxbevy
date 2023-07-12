@@ -1,9 +1,8 @@
 use bevy::{
-    diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin},
+    diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
     prelude::*,
 };
 use bevy_egui::{egui, EguiContexts};
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 pub struct DebugPlugin;
 
@@ -15,13 +14,12 @@ impl Plugin for DebugPlugin {
             return;
         }
 
-        app.add_plugin(FrameTimeDiagnosticsPlugin)
-            .add_plugin(WorldInspectorPlugin::new())
-            .add_system(show_fps);
+        app.add_plugins((FrameTimeDiagnosticsPlugin,))
+            .add_systems(Update, show_fps);
     }
 }
 
-fn show_fps(diagnostics: Res<Diagnostics>, mut contexts: EguiContexts) {
+fn show_fps(diagnostics: Res<DiagnosticsStore>, mut contexts: EguiContexts) {
     let mut fps_value = 0.0;
     if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
         if let Some(value) = fps.smoothed() {

@@ -7,7 +7,7 @@ pub struct RendererPlugin;
 
 impl Plugin for RendererPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems((spawn_stadium,).in_schedule(OnEnter(AppState::InGame)));
+        app.add_systems(OnEnter(AppState::InGame), (spawn_stadium,));
     }
 }
 

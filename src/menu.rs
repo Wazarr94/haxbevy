@@ -1,4 +1,4 @@
-use bevy::{asset::*, prelude::*, reflect::TypeUuid};
+use bevy::{asset::*, prelude::*, reflect::*};
 use bevy_egui::{egui, EguiContexts, EguiSettings};
 use jsonc_parser::{parse_to_serde_value, ParseOptions};
 
@@ -13,9 +13,12 @@ impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_asset::<StadiumAsset>()
             .init_asset_loader::<StadiumLoader>()
-            .add_system(setup_menu.in_schedule(OnEnter(AppState::Menu)))
-            .add_systems((menu, load_to_ingame).in_set(OnUpdate(AppState::Menu)))
-            .add_system(cleanup_menu.in_schedule(OnExit(AppState::Menu)));
+            .add_systems(OnEnter(AppState::Menu), setup_menu)
+            .add_systems(
+                Update,
+                (menu, load_to_ingame).run_if(in_state(AppState::Menu)),
+            )
+            .add_systems(OnExit(AppState::Menu), cleanup_menu);
     }
 }
 
@@ -112,7 +115,7 @@ pub struct DataAssets {
     pub stadium: Handle<StadiumAsset>,
 }
 
-#[derive(Debug, TypeUuid)]
+#[derive(Debug, TypeUuid, TypePath)]
 #[uuid = "ff866d71-0c0e-4af0-8437-a4177ed03f2c"]
 pub struct StadiumAsset(pub Stadium);
 

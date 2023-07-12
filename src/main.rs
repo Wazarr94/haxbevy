@@ -29,11 +29,13 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugin(EguiPlugin)
-        .add_plugin(ShapePlugin)
-        .add_plugin(DebugPlugin)
-        .add_plugin(MenuPlugin)
-        .add_plugin(RendererPlugin)
+        .add_plugins((
+            EguiPlugin,
+            ShapePlugin,
+            DebugPlugin,
+            MenuPlugin,
+            RendererPlugin,
+        ))
         .run();
 }
 
