@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use super::{
     hx_trait::{Trait, Traitable},
-    utils::{parse_collision, BouncingCoef, Collision, CollisionFlag},
+    utils::{parse_collision, BouncingCoef, Collision, CollisionFlag, Position},
 };
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -90,16 +90,13 @@ pub struct Vertex {
 }
 
 #[derive(Component, Debug, Clone)]
-pub struct VertexComp {
-    pub position: DVec2,
-}
+pub struct VertexComp;
 
 impl Vertex {
     pub fn spawn(&self, stadium_parent: &mut ChildBuilder) {
         stadium_parent.spawn((
-            VertexComp {
-                position: self.position,
-            },
+            VertexComp,
+            Position(self.position),
             BouncingCoef(self.b_coef),
             Collision {
                 group: self.c_group,

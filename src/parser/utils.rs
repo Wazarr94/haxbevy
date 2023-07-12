@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{math::DVec2, prelude::*};
 use bevy_prototype_lyon::prelude::*;
 use bitflags::bitflags;
 use serde_json::Value;
@@ -95,6 +95,9 @@ pub enum Team {
     Red = 2,
     Blue = 3,
 }
+
+#[derive(Component, Debug, Clone)]
+pub struct Position(pub DVec2);
 
 #[derive(Component, Debug, Clone)]
 pub struct BouncingCoef(pub f64);

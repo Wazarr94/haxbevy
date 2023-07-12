@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use super::{
     hx_trait::{Trait, Traitable},
-    utils::{parse_collision, parse_color, BouncingCoef, Collision, CollisionFlag},
+    utils::{parse_collision, parse_color, BouncingCoef, Collision, CollisionFlag, Position},
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -157,14 +157,15 @@ impl Disc {
                 ShapeBundle {
                     path: GeometryBuilder::build_as(&shapes::Circle {
                         radius: self.radius as f32,
-                        center: Vec2::new(self.position.x as f32, self.position.y as f32),
+                        center: Vec2::ZERO,
                     }),
-                    transform: Transform::from_xyz(0.0, 0.0, z),
+                    transform: Transform::from_xyz(self.position.x as f32, self.position.y as f32, z),
                     ..default()
                 },
                 Fill::color(self.color),
                 Stroke::new(Color::BLACK, 1.5),
             ),
+            Position(self.position),
             Velocity(self.speed),
             Gravity(self.gravity),
             InverseMass(self.inv_mass),

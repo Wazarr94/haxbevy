@@ -3,6 +3,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_egui::{egui, EguiContexts};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 pub struct DebugPlugin;
 
@@ -14,7 +15,7 @@ impl Plugin for DebugPlugin {
             return;
         }
 
-        app.add_plugins((FrameTimeDiagnosticsPlugin,))
+        app.add_plugins((FrameTimeDiagnosticsPlugin, WorldInspectorPlugin::new()))
             .add_systems(Update, show_fps);
     }
 }
