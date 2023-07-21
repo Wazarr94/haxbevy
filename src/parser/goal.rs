@@ -31,7 +31,7 @@ pub struct Goal {
     pub team: Team,
 }
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct GoalComp {
     pub p0: DVec2,
     pub p1: DVec2,
@@ -43,7 +43,7 @@ impl Goal {
         stadium_parent.spawn(GoalComp {
             p0: self.p0,
             p1: self.p1,
-            team: self.team.clone(),
+            team: self.team,
         });
     }
 }

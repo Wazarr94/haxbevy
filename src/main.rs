@@ -4,11 +4,13 @@ use bevy_egui::EguiPlugin;
 use bevy_prototype_lyon::prelude::*;
 use debug::DebugPlugin;
 use menu::MenuPlugin;
+use physics::PhysicsPlugin;
 use renderer::RendererPlugin;
 
 mod debug;
 mod menu;
 mod parser;
+mod physics;
 mod renderer;
 
 fn main() {
@@ -18,6 +20,7 @@ fn main() {
 
     App::new()
         .add_state::<AppState>()
+        .insert_resource(FixedTime::new_from_secs(1.0 / 60.0))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 present_mode: PresentMode::AutoVsync,
@@ -35,6 +38,7 @@ fn main() {
             DebugPlugin,
             MenuPlugin,
             RendererPlugin,
+            PhysicsPlugin,
         ))
         .run();
 }

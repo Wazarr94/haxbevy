@@ -1,9 +1,6 @@
 use crate::{
     menu::{DataAssets, StadiumAsset},
-    parser::{
-        disc::{Damping, Gravity, Velocity},
-        utils::Position,
-    },
+    parser::utils::Position,
 };
 use bevy::{prelude::*, render::camera::ScalingMode};
 
@@ -14,9 +11,7 @@ pub struct RendererPlugin;
 impl Plugin for RendererPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGame), (spawn_stadium,))
-            .add_systems(Update, draw_discs.run_if(in_state(AppState::InGame)))
-            .add_systems(FixedUpdate, update_discs)
-            .insert_resource(FixedTime::new_from_secs(1.0 / 60.0));
+            .add_systems(Update, draw_discs.run_if(in_state(AppState::InGame)));
     }
 }
 
@@ -42,13 +37,6 @@ fn spawn_stadium(
     });
 
     st.spawn(&mut commands);
-}
-
-fn update_discs(mut query: Query<(&mut Position, &mut Velocity, &Gravity, &Damping)>) {
-    for (mut position, mut velocity, gravity, damping) in query.iter_mut() {
-        position.0 += velocity.0;
-        velocity.0 = (velocity.0 + gravity.0) * damping.0;
-    }
 }
 
 fn draw_discs(mut query: Query<(&mut Transform, &Position)>) {

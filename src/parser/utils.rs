@@ -88,7 +88,7 @@ pub fn arc(center: Vec2, radius: f32, start_angle: f32, end_angle: f32, toleranc
     path_builder.build()
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 #[allow(dead_code)]
 pub enum Team {
     Spectator = 1,
@@ -96,13 +96,13 @@ pub enum Team {
     Blue = 3,
 }
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct Position(pub DVec2);
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct BouncingCoef(pub f64);
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct Collision {
     pub group: CollisionFlag,
     pub mask: CollisionFlag,

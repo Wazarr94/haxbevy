@@ -144,15 +144,15 @@ pub struct StraightSegment {
     pub c_mask: CollisionFlag,
 }
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct SegmentComp {
     pub vertex_indices: (usize, usize),
 }
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct Bias(pub f64);
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct Curve(pub f64);
 
 impl StraightSegment {

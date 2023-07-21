@@ -32,8 +32,8 @@ impl Default for DiscRaw {
             pos: [0.0, 0.0],
             speed: Some([0.0, 0.0]),
             gravity: Some([0.0, 0.0]),
-            radius: Some(8.0),
-            inv_mass: Some(0.0),
+            radius: Some(10.0),
+            inv_mass: Some(1.0),
             damping: Some(0.99),
             b_coef: Some(0.5),
             color: Some(Value::String("FFFFFF".to_string())),
@@ -133,7 +133,12 @@ pub struct Disc {
 }
 
 #[derive(Component, Debug, Clone, Copy)]
-pub struct DiscComp;
+pub struct DiscComp {
+    pub index: usize,
+}
+
+#[derive(Component, Debug, Clone, Copy)]
+pub struct Radius(pub f64);
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Velocity(pub DVec2);
@@ -152,14 +157,18 @@ impl Disc {
         let z = 0.3 + index as f32 * 0.001;
 
         stadium_parent.spawn((
-            DiscComp,
+            DiscComp { index },
             (
                 ShapeBundle {
                     path: GeometryBuilder::build_as(&shapes::Circle {
                         radius: self.radius as f32,
                         center: Vec2::ZERO,
                     }),
-                    transform: Transform::from_xyz(self.position.x as f32, self.position.y as f32, z),
+                    transform: Transform::from_xyz(
+                        self.position.x as f32,
+                        self.position.y as f32,
+                        z,
+                    ),
                     ..default()
                 },
                 Fill::color(self.color),
@@ -168,6 +177,7 @@ impl Disc {
             Position(self.position),
             Velocity(self.speed),
             Gravity(self.gravity),
+            Radius(self.radius),
             InverseMass(self.inv_mass),
             Damping(self.damping),
             BouncingCoef(self.b_coef),

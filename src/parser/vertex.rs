@@ -89,7 +89,7 @@ pub struct Vertex {
     pub c_mask: CollisionFlag,
 }
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct VertexComp;
 
 impl Vertex {

@@ -93,8 +93,8 @@ pub struct Plane {
     pub c_mask: CollisionFlag,
 }
 
-#[derive(Component, Debug, Clone)]
-pub struct PlaneComponent {
+#[derive(Component, Debug, Clone, Copy)]
+pub struct PlaneComp {
     pub normal: DVec2,
     pub dist: f64,
 }
@@ -102,7 +102,7 @@ pub struct PlaneComponent {
 impl Plane {
     pub fn spawn(&self, stadium_parent: &mut ChildBuilder) {
         stadium_parent.spawn((
-            PlaneComponent {
+            PlaneComp {
                 normal: self.normal,
                 dist: self.dist,
             },
