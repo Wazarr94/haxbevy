@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 use crate::parser::disc::{Damping, DiscComp, Gravity, InverseMass, Radius, Velocity};
 use crate::parser::plane::PlaneComp;
-use crate::parser::segment::{Bias, Curve, SegmentComp};
+use crate::parser::segment::{Bias, Curve, CurvedUtils, SegmentComp};
 use crate::parser::utils::{BouncingCoef, Collision, CollisionFlag, Position};
 use crate::parser::vertex::VertexComp;
 use crate::AppState;
@@ -19,6 +19,7 @@ impl Plugin for PhysicsPlugin {
                 disc_disc_collision,
                 disc_plane_collision,
                 disc_straight_segment_collision,
+                disc_curved_segment_collision,
                 disc_vertex_collision,
             )
                 .chain()
@@ -195,6 +196,74 @@ fn disc_straight_segment_collision(
 
             let norm_segment = DVec2::new(segment_vec.y, -segment_vec.x).normalize();
             let dist = norm_segment.dot(disc_vertex_b_vec);
+            let (dist_f, norm_segment_f) = segment_apply_bias(bias, dist, norm_segment);
+
+            if dist_f > radius.0 {
+                continue;
+            }
+
+            position.0 += norm_segment_f * (radius.0 - dist_f);
+            let normal_velocity = velocity.0.dot(norm_segment_f);
+            if normal_velocity < 0.0 {
+                let impulse = -(1.0 + b_coef_disc.0 * b_coef_segment.0) * normal_velocity;
+                velocity.0 += norm_segment_f * impulse;
+            }
+        }
+    }
+}
+
+fn disc_curved_segment_collision(
+    mut discs: Query<
+        (
+            &mut Position,
+            &mut Velocity,
+            &Radius,
+            &InverseMass,
+            &BouncingCoef,
+            &Collision,
+        ),
+        Without<VertexComp>,
+    >,
+    segments: Query<(&SegmentComp, &BouncingCoef, &Bias, &Collision, &Curve)>,
+    vertexes: Query<(&VertexComp, &Position, &Collision)>,
+) {
+    let vertexes_vec = vertexes.iter().collect::<Vec<_>>();
+
+    for (mut position, mut velocity, radius, inv_mass, b_coef_disc, collision_disc) in
+        discs.iter_mut()
+    {
+        for (segment_comp, b_coef_segment, bias, collision_segment, curve) in segments.iter() {
+            if inv_mass.0 == 0.0 {
+                continue;
+            }
+
+            if collision_disc.group & collision_segment.mask == CollisionFlag::empty()
+                || collision_segment.group & collision_disc.mask == CollisionFlag::empty()
+            {
+                continue;
+            }
+
+            let vertex_a_pos = vertexes_vec.get(segment_comp.vertex_indices.0).unwrap().1;
+            let vertex_b_pos = vertexes_vec.get(segment_comp.vertex_indices.1).unwrap().1;
+
+            let circle_center = CurvedUtils::circle_center(vertex_a_pos.0, vertex_b_pos.0, curve.0);
+            let circle_radius = CurvedUtils::circle_radius(vertex_a_pos.0, vertex_b_pos.0, curve.0);
+            let circle_tangent =
+                CurvedUtils::circle_tangents(vertex_a_pos.0, vertex_b_pos.0, curve.0);
+
+            let disc_circle_vec = position.0 - circle_center;
+
+            if (disc_circle_vec.dot(circle_tangent.0) > 0.0
+                && disc_circle_vec.dot(circle_tangent.1) > 0.0)
+                == (curve.0 < 0.0)
+            {
+                continue;
+            }
+
+            // get the norm of disc_circle_vec
+            let dist = disc_circle_vec.length() - circle_radius;
+            let norm_segment = disc_circle_vec.normalize();
+
             let (dist_f, norm_segment_f) = segment_apply_bias(bias, dist, norm_segment);
 
             if dist_f > radius.0 {

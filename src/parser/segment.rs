@@ -209,6 +209,37 @@ impl DerefMut for CurvedSegment {
     }
 }
 
+pub struct CurvedUtils;
+
+impl CurvedUtils {
+    pub fn circle_center(vertex_0_pos: DVec2, vertex_1_pos: DVec2, curve: f64) -> DVec2 {
+        let vec_center = (vertex_1_pos - vertex_0_pos) / 2.0;
+        let circle_center_x = vertex_0_pos.x + vec_center.x - vec_center.y * curve;
+        let circle_center_y = vertex_0_pos.y + vec_center.y + vec_center.x * curve;
+        DVec2::new(circle_center_x, circle_center_y)
+    }
+
+    pub fn circle_radius(vertex_0_pos: DVec2, vertex_1_pos: DVec2, curve: f64) -> f64 {
+        let center = CurvedUtils::circle_center(vertex_0_pos, vertex_1_pos, curve);
+        (vertex_0_pos - center).length()
+    }
+
+    pub fn circle_tangents(vertex_0_pos: DVec2, vertex_1_pos: DVec2, curve: f64) -> (DVec2, DVec2) {
+        let center = CurvedUtils::circle_center(vertex_0_pos, vertex_1_pos, curve);
+        (vertex_1_pos - center, vertex_0_pos - center)
+    }
+
+    pub fn circle_angles(vertex_0_pos: DVec2, vertex_1_pos: DVec2, curve: f64) -> (f64, f64) {
+        let center = CurvedUtils::circle_center(vertex_0_pos, vertex_1_pos, curve);
+        let angle_0 = (vertex_0_pos.y - center.y).atan2(vertex_0_pos.x - center.x);
+        let mut angle_1 = (vertex_1_pos.y - center.y).atan2(vertex_1_pos.x - center.x);
+        while angle_1 < angle_0 {
+            angle_1 += 2.0 * PI;
+        }
+        (angle_0, angle_1)
+    }
+}
+
 impl CurvedSegment {
     pub fn new(raw_segment: &SegmentRaw, traits: &HashMap<String, Trait>) -> CurvedSegment {
         let base = raw_segment.to_straight(traits);
@@ -243,42 +274,6 @@ impl CurvedSegment {
         curve_value
     }
 
-    pub fn circle_center(&self, vertexes: &[Vertex]) -> DVec2 {
-        let pos_0 = vertexes[self.vertex_indices.0].position;
-        let pos_1 = vertexes[self.vertex_indices.1].position;
-        let vec_center = (pos_1 - pos_0) / 2.0;
-        let circle_center_x = pos_0.x + vec_center.x - vec_center.y * self.curve;
-        let circle_center_y = pos_0.y + vec_center.y + vec_center.x * self.curve;
-        DVec2::new(circle_center_x, circle_center_y)
-    }
-
-    pub fn circle_radius(&self, vertexes: &[Vertex]) -> f64 {
-        let pos_0 = vertexes[self.vertex_indices.0].position;
-        let center = self.circle_center(vertexes);
-
-        (pos_0 - center).length()
-    }
-
-    #[allow(dead_code)]
-    pub fn circle_tangeants(&self, vertexes: &[Vertex]) -> (DVec2, DVec2) {
-        let pos_0 = vertexes[self.vertex_indices.0].position;
-        let pos_1 = vertexes[self.vertex_indices.1].position;
-        let center = self.circle_center(vertexes);
-        (pos_1 - center, pos_0 - center)
-    }
-
-    pub fn circle_angles(&self, vertexes: &[Vertex]) -> (f64, f64) {
-        let pos_0 = vertexes[self.vertex_indices.0].position;
-        let pos_1 = vertexes[self.vertex_indices.1].position;
-        let center = self.circle_center(vertexes);
-        let angle_0 = (pos_0.y - center.y).atan2(pos_0.x - center.x);
-        let mut angle_1 = (pos_1.y - center.y).atan2(pos_1.x - center.x);
-        while angle_1 < angle_0 {
-            angle_1 += 2.0 * PI;
-        }
-        (angle_0, angle_1)
-    }
-
     fn get_tolerance(&self, radius: f32) -> f32 {
         let tolerance = PI as f32 / 16.0;
         10.0 * tolerance / radius
@@ -287,13 +282,13 @@ impl CurvedSegment {
     fn spawn(&self, stadium_parent: &mut ChildBuilder, vertexes: &[Vertex], index: usize) {
         let z = 0.2 + index as f32 * 0.0001;
 
-        let circle_angles = self.circle_angles(vertexes);
-        let circle_radius = self.circle_radius(vertexes) as f32;
+        let pos_0 = vertexes.get(self.vertex_indices.0).unwrap().position;
+        let pos_1 = vertexes.get(self.vertex_indices.1).unwrap().position;
+        let circle_angles = CurvedUtils::circle_angles(pos_0, pos_1, self.curve);
+        let circle_radius = CurvedUtils::circle_radius(pos_0, pos_1, self.curve) as f32;
+        let circle_center = CurvedUtils::circle_center(pos_0, pos_1, self.curve);
         let path = arc(
-            Vec2::new(
-                self.circle_center(vertexes).x as f32,
-                self.circle_center(vertexes).y as f32,
-            ),
+            Vec2::new(circle_center.x as f32, circle_center.y as f32),
             circle_radius,
             circle_angles.0 as f32,
             circle_angles.1 as f32,
