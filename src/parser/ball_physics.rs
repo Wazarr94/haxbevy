@@ -53,7 +53,8 @@ pub fn handle_ball(
                 Value::Array(vec![0.0.into(), 0.0.into()]),
             );
             let disc_raw: DiscRaw = serde_json::from_value(Value::Object(o_mut)).unwrap();
-            let disc = disc_raw.to_disc(traits);
+            let mut disc = disc_raw.to_disc(traits);
+            disc.c_group |= CollisionFlag::KICK | CollisionFlag::SCORE;
             Ball(disc)
         }
         _ => panic!("ball must be either \"disc0\" or a disc object"),
