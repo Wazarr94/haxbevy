@@ -1,6 +1,8 @@
 use bevy::math::DVec2;
 use serde::{Deserialize, Serialize};
 
+use super::utils::{parse_collision, CollisionFlag};
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerPhysicsRaw {
@@ -60,7 +62,7 @@ impl PlayerPhysicsRaw {
         let inv_mass = pp_def.inv_mass.unwrap();
         let b_coef = pp_def.b_coef.unwrap();
         let damping = pp_def.damping.unwrap();
-        let c_group = pp_def.c_group.unwrap();
+        let c_group = parse_collision(&pp_def.c_group.unwrap());
         let acceleration = pp_def.acceleration.unwrap();
         let kicking_acceleration = pp_def.kicking_acceleration.unwrap();
         let kicking_damping = pp_def.kicking_damping.unwrap();
@@ -89,7 +91,7 @@ pub struct PlayerPhysics {
     pub inv_mass: f64,
     pub b_coef: f64,
     pub damping: f64,
-    pub c_group: Vec<String>,
+    pub c_group: CollisionFlag,
     pub acceleration: f64,
     pub kicking_acceleration: f64,
     pub kicking_damping: f64,
